@@ -4,6 +4,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import '../audio/sound_service.dart';
 import '../engine/timer_engine.dart';
 import '../models/models.dart';
+import '../services/round_service.dart';
 import '../theme/led_theme.dart';
 import 'seven_segment.dart';
 
@@ -30,9 +31,42 @@ class _TimerScreenState extends State<TimerScreen> {
     WakelockPlus.enable();
     _engine.start();
     _ticker = Timer.periodic(const Duration(milliseconds: 100), (_) => _engine.tick());
+    RoundService.start(
+      title: _notificationTitle(),
+      text: _notificationText(),
+    );
   }
 
-  void _onEngine() => setState(() {});
+  void _onEngine() {
+    setState(() {});
+    RoundService.update(
+      title: _notificationTitle(),
+      text: _notificationText(),
+    );
+  }
+
+  String _notificationTitle() {
+    final pos = _engine.position;
+    if (_engine.isFinished || pos == null) return 'TIME — DONE';
+    final state = !_engine.isRunning
+        ? 'PAUSED'
+        : switch (pos.phase.type) {
+            PhaseType.prep => 'GET READY',
+            PhaseType.work => 'FIGHT',
+            PhaseType.rest => 'REST',
+          };
+    if (pos.phase.type == PhaseType.prep) return state;
+    return 'ROUND ${pos.phase.round} OF ${widget.config.rounds} — $state';
+  }
+
+  String _notificationText() {
+    final pos = _engine.position;
+    if (_engine.isFinished || pos == null) return 'Session complete';
+    final r = pos.remaining + const Duration(milliseconds: 999);
+    final m = r.inMinutes;
+    final s = (r.inSeconds % 60).toString().padLeft(2, '0');
+    return '$m:$s remaining';
+  }
 
   void _handleEvent(TimerEvent e, Phase? phase) {
     switch (e) {
@@ -49,6 +83,7 @@ class _TimerScreenState extends State<TimerScreen> {
   void dispose() {
     _ticker?.cancel();
     _engine.removeListener(_onEngine);
+    RoundService.stop();
     WakelockPlus.disable();
     _sounds.dispose();
     super.dispose();

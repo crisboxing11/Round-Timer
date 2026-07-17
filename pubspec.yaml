@@ -13,6 +13,7 @@ dependencies:
   wakelock_plus: ^1.2.0
   just_audio: ^0.10.5
   audio_session: ^0.2.2
+  flutter_foreground_task: ^10.0.0
 
 dev_dependencies:
   flutter_test:

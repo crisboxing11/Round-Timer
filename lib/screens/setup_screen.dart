@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/models.dart';
 import '../theme/led_theme.dart';
+import 'custom_config_screen.dart';
 import 'timer_screen.dart';
 
 class SetupScreen extends StatefulWidget {
@@ -27,6 +28,20 @@ class _SetupScreenState extends State<SetupScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => TimerScreen(config: c)),
     );
+  }
+
+  Future<void> _openCustom() async {
+    final last = _last;
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => CustomConfigScreen(
+          initial: (last != null && last.id == 'custom') ? last : null,
+        ),
+      ),
+    );
+    // Refresh the quick-start tile in case a custom session was started.
+    final refreshed = await LastConfigStore.load();
+    if (mounted) setState(() => _last = refreshed);
   }
 
   @override
@@ -56,9 +71,12 @@ class _SetupScreenState extends State<SetupScreen> {
             Expanded(
               child: ListView.separated(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                itemCount: presets.length,
+                itemCount: presets.length + 1,
                 separatorBuilder: (_, __) => const SizedBox(height: 12),
                 itemBuilder: (context, i) {
+                  if (i == presets.length) {
+                    return _CustomTile(onTap: _openCustom);
+                  }
                   final p = presets[i];
                   return _PresetTile(config: p, onTap: () => _start(p));
                 },
@@ -127,6 +145,40 @@ class _QuickStartTile extends StatelessWidget {
               ),
               const Icon(Icons.play_arrow_rounded,
                   color: LedColors.green, size: 44),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CustomTile extends StatelessWidget {
+  const _CustomTile({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: LedColors.panel,
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: LedColors.amber, width: 2),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'CUSTOM',
+                style: LedText.presetName.copyWith(color: LedColors.amber),
+              ),
+              const Icon(Icons.tune, color: LedColors.amber, size: 26),
             ],
           ),
         ),

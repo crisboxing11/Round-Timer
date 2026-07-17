@@ -1,0 +1,35 @@
+name: round_timer
+description: "Round Timer: Boxing, MMA, Judo — combat sports round timer."
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  shared_preferences: ^2.2.0
+  wakelock_plus: ^1.2.0
+  just_audio: ^0.9.36
+  audio_session: ^0.1.18
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  # Add bundled assets when ready:
+  # assets:
+  #   - assets/audio/bell.wav
+  #   - assets/audio/clapper.wav
+  # fonts:
+  #   - family: BarlowCondensed
+  #     fonts:
+  #       - asset: assets/fonts/BarlowCondensed-Regular.ttf
+  #       - asset: assets/fonts/BarlowCondensed-SemiBold.ttf
+  #         weight: 600
+  #       - asset: assets/fonts/BarlowCondensed-ExtraBold.ttf
+  #         weight: 800

@@ -53,7 +53,7 @@ class _ClockPainter extends CustomPainter {
     final xs = [0.0, unit * 3, unit * 7, unit * 10];
 
     final glow = Paint()
-      ..color = color.withOpacity(0.35)
+      ..color = color.withValues(alpha: 0.35)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 10);
 
     for (var i = 0; i < 4; i++) {

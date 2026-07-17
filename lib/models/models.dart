@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 enum PhaseType { prep, work, rest }
@@ -65,17 +67,30 @@ const presets = <TimerConfig>[
 ];
 
 /// Persist/restore the last used config so the app opens ready to go.
+/// Stores the full config as JSON so custom setups survive restarts too.
 class LastConfigStore {
-  static const _key = 'last_config_id';
+  static const _key = 'last_config';
+  static const _legacyKey = 'last_config_id';
 
   static Future<void> save(TimerConfig c) async {
     final p = await SharedPreferences.getInstance();
-    await p.setString(_key, c.id);
+    await p.setString(_key, jsonEncode(c.toJson()));
   }
 
   static Future<TimerConfig> load() async {
     final p = await SharedPreferences.getInstance();
-    final id = p.getString(_key);
-    return presets.firstWhere((c) => c.id == id, orElse: () => presets.first);
+    final json = p.getString(_key);
+    if (json != null) {
+      try {
+        return TimerConfig.fromJson(jsonDecode(json) as Map<String, dynamic>);
+      } catch (_) {
+        // Corrupt entry — fall through to defaults.
+      }
+    }
+    final legacyId = p.getString(_legacyKey);
+    return presets.firstWhere(
+      (c) => c.id == legacyId,
+      orElse: () => presets.first,
+    );
   }
 }

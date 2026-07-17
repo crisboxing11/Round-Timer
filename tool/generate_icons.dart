@@ -16,8 +16,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:round_timer/theme/led_theme.dart';
 
-/// Neon-sign boxing glove: union of fist, thumb, and cuff, stroked in glow.
-/// Geometry is authored on a 1024 grid and scaled by [s].
+/// Upright boxing glove silhouette (like the glove emoji): big fist mass,
+/// thumb lobe on the left, cuff band below. Filled union of three shapes;
+/// seam lines are cut in background color on top. 1024 grid, scaled by [s].
 Path _glovePath(double s) {
   Path oval(double cx, double cy, double rx, double ry, [double rot = 0]) {
     final p = Path()
@@ -29,26 +30,33 @@ Path _glovePath(double s) {
     return p.transform(m.storage);
   }
 
-  // Fist body — big rounded mass, slightly taller than wide.
-  final body = oval(536, 430, 252, 274);
-  // Thumb — angled pad on the left front.
-  final thumb = oval(298, 512, 108, 156, -0.30);
-  // Cuff — wrist band below the fist.
+  // Fist — big mass, biased right so the glove is asymmetric.
+  final fist = oval(572, 420, 265, 260);
+  // Thumb — clear lobe on the lower left.
+  final thumb = oval(330, 545, 115, 150, -0.20);
+  // Cuff — band below, tucked inside the fist's width so the union stays
+  // smooth (no stepped shoulders).
   final cuff = Path()
     ..addRRect(RRect.fromRectAndRadius(
-      Rect.fromLTRB(408 * s, 640 * s, 668 * s, 856 * s),
-      Radius.circular(52 * s),
+      Rect.fromCenter(
+          center: Offset(572 * s, 730 * s), width: 300 * s, height: 240 * s),
+      Radius.circular(58 * s),
     ));
 
-  var glove = Path.combine(PathOperation.union, body, thumb);
+  var glove = Path.combine(PathOperation.union, fist, thumb);
   glove = Path.combine(PathOperation.union, glove, cuff);
   return glove;
 }
 
-/// Wrist seam — a lace-line detail across the glove where cuff meets fist.
+/// Seams drawn in background color over the fill: the cuff line and the
+/// thumb crease — what makes the silhouette read "glove", not "blob".
 Path _seamPath(double s) => Path()
-  ..moveTo(420 * s, 668 * s)
-  ..quadraticBezierTo(538 * s, 726 * s, 656 * s, 668 * s);
+  // Cuff seam — slight downward arc across the wrist.
+  ..moveTo(440 * s, 640 * s)
+  ..quadraticBezierTo(572 * s, 692 * s, 704 * s, 640 * s)
+  // Thumb crease — along the inner edge of the thumb lobe.
+  ..moveTo(450 * s, 440 * s)
+  ..cubicTo(380 * s, 480 * s, 372 * s, 560 * s, 415 * s, 640 * s);
 
 void _drawIcon(
   Canvas canvas, {
@@ -97,31 +105,24 @@ void _drawIcon(
     );
   }
 
-  // Faint fill so the glove reads as a solid object, not just wire.
-  canvas.drawPath(glove, Paint()..color = neon.withValues(alpha: 0.08));
+  // Solid silhouette over a soft LED glow.
+  canvas.drawPath(
+    glove,
+    Paint()
+      ..color = neon.withValues(alpha: 0.45)
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 40 * s),
+  );
+  canvas.drawPath(glove, Paint()..color = neon);
 
-  // Neon tube: wide soft glow, tighter halo, then the crisp stroke.
-  final glowWide = Paint()
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = strokeW * 1.6
-    ..color = neon.withValues(alpha: 0.30)
-    ..maskFilter = MaskFilter.blur(BlurStyle.normal, 34 * s);
-  final glowTight = Paint()
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = strokeW
-    ..color = neon.withValues(alpha: 0.55)
-    ..maskFilter = MaskFilter.blur(BlurStyle.normal, 10 * s);
-  final tube = Paint()
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = strokeW
-    ..strokeCap = StrokeCap.round
-    ..color = neon;
-
-  for (final path in [glove, seam]) {
-    canvas.drawPath(path, glowWide);
-    canvas.drawPath(path, glowTight);
-    canvas.drawPath(path, tube);
-  }
+  // Seams cut into the fill in panel color give it the glove anatomy.
+  canvas.drawPath(
+    seam,
+    Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeW * 0.8
+      ..strokeCap = StrokeCap.round
+      ..color = LedColors.bg,
+  );
 
   canvas.restore();
 }

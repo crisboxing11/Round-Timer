@@ -33,8 +33,8 @@ class SoundService {
       debugPrint('SoundService: audio session config failed: $e');
     }
     try {
-      await _bell.setAsset('assets/audio/bell.wav', preload: true);
-      await _clapper.setAsset('assets/audio/clapper.wav', preload: true);
+      await _bell.setAsset('assets/audio/bell.m4a', preload: true);
+      await _clapper.setAsset('assets/audio/clapper.m4a', preload: true);
       _ready = true;
     } catch (e) {
       // Assets not bundled yet — run silent rather than crash.

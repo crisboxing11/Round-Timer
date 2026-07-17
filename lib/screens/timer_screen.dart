@@ -95,7 +95,7 @@ class _TimerScreenState extends State<TimerScreen> {
           decoration: BoxDecoration(
             boxShadow: [
               BoxShadow(
-                color: color.withOpacity(0.13),
+                color: color.withValues(alpha: 0.13),
                 blurRadius: 140,
                 spreadRadius: -20,
               ),

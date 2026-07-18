@@ -73,7 +73,7 @@ void main() {
       expect(find.text('0'), findsNothing);
     });
 
-    testWidgets('rest steps down to OFF and back', (tester) async {
+    testWidgets('rest steps down to OFF and back in 5s steps', (tester) async {
       await pumpConfig(
         tester,
         initial: const TimerConfig(
@@ -81,9 +81,12 @@ void main() {
           name: 'Custom',
           rounds: 3,
           work: Duration(minutes: 3),
-          rest: Duration(seconds: 15),
+          rest: Duration(seconds: 10),
         ),
       );
+      await tester.tap(find.byIcon(Icons.remove).last);
+      await tester.pump();
+      expect(find.text('0:05'), findsOneWidget);
       await tester.tap(find.byIcon(Icons.remove).last);
       await tester.pump();
       expect(find.text('OFF'), findsOneWidget);
@@ -93,7 +96,28 @@ void main() {
       expect(find.text('OFF'), findsOneWidget);
       await tester.tap(find.byIcon(Icons.add).last);
       await tester.pump();
-      expect(find.text('0:15'), findsOneWidget);
+      expect(find.text('0:05'), findsOneWidget);
+    });
+
+    testWidgets('steps switch to 15s above one minute', (tester) async {
+      await pumpConfig(
+        tester,
+        initial: const TimerConfig(
+          id: 'custom',
+          name: 'Custom',
+          rounds: 3,
+          work: Duration(minutes: 1),
+          rest: Duration(minutes: 1),
+        ),
+      );
+      // Work up from 1:00 → coarse step to 1:15.
+      await tester.tap(find.byIcon(Icons.add).at(1));
+      await tester.pump();
+      expect(find.text('1:15'), findsOneWidget);
+      // Rest down from 1:00 → fine step to 0:55.
+      await tester.tap(find.byIcon(Icons.remove).last);
+      await tester.pump();
+      expect(find.text('0:55'), findsOneWidget);
     });
 
     testWidgets('total updates with the schedule (prep included)',

@@ -97,51 +97,80 @@ Path _wrapBandsPath(double s, Path glove) {
   return Path.combine(PathOperation.intersect, bands, glove);
 }
 
-/// Ring-side fight bell: round gong disc, center bolt, hammer at two
-/// o'clock, strike marks. 1024 grid, scaled by [s].
+/// Ringside fight bell: brass dome on a base plate, center bolt, hammer
+/// mid-strike, ring marks. Half-circle + plate + hammer — a silhouette
+/// nothing else on a home screen has. 1024 grid, scaled by [s].
 void _drawBell(Canvas canvas, double s, Color brass, Color bg) {
-  final center = Offset(500 * s, 560 * s);
-  final r = 250 * s;
+  final domeCenter = Offset(500 * s, 664 * s);
+  final r = 292 * s;
 
-  // Glow + disc.
+  // Glow behind the whole bell.
   canvas.drawCircle(
-    center,
+    Offset(500 * s, 560 * s),
     r,
     Paint()
-      ..color = brass.withValues(alpha: 0.45)
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 40 * s),
+      ..color = brass.withValues(alpha: 0.40)
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 44 * s),
   );
-  canvas.drawCircle(center, r, Paint()..color = brass);
-  // Inner rim + center bolt, cut in panel color.
+
+  // Dome — half-circle sitting on the plate.
+  final dome = Path()
+    ..moveTo(domeCenter.dx - r, domeCenter.dy)
+    ..arcTo(Rect.fromCircle(center: domeCenter, radius: r), 3.14159, 3.14159,
+        false)
+    ..close();
+  canvas.drawPath(dome, Paint()..color = brass);
+
+  // Base plate — slightly wider than the dome.
+  canvas.drawRRect(
+    RRect.fromRectAndRadius(
+      Rect.fromLTRB(160 * s, 692 * s, 840 * s, 756 * s),
+      Radius.circular(20 * s),
+    ),
+    Paint()..color = brass,
+  );
+
+  // Center bolt + a rim line following the dome, cut in panel color.
   canvas.drawCircle(
-    center,
-    r * 0.62,
+      Offset(500 * s, 540 * s), 34 * s, Paint()..color = bg);
+  final rim = Path()
+    ..moveTo(domeCenter.dx - r * 0.72, domeCenter.dy - 26 * s)
+    ..arcTo(
+        Rect.fromCircle(
+            center: Offset(domeCenter.dx, domeCenter.dy - 26 * s),
+            radius: r * 0.72),
+        3.14159,
+        3.14159,
+        false);
+  canvas.drawPath(
+    rim,
     Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 22 * s
+      ..strokeWidth = 20 * s
       ..color = bg,
   );
-  canvas.drawCircle(center, 34 * s, Paint()..color = bg);
 
-  // Hammer: shaft from upper-right toward the rim, round head at the rim.
-  final shaft = Paint()
-    ..style = PaintingStyle.stroke
-    ..strokeWidth = 46 * s
-    ..strokeCap = StrokeCap.round
-    ..color = brass;
+  // Hammer mid-strike at the upper right: shaft + round head.
   canvas.drawLine(
-      Offset(858 * s, 176 * s), Offset(716 * s, 330 * s), shaft);
-  canvas.drawCircle(Offset(700 * s, 348 * s), 64 * s, Paint()..color = brass);
+    Offset(886 * s, 190 * s),
+    Offset(752 * s, 330 * s),
+    Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 44 * s
+      ..strokeCap = StrokeCap.round
+      ..color = brass,
+  );
+  canvas.drawCircle(Offset(736 * s, 348 * s), 60 * s, Paint()..color = brass);
 
-  // Strike marks radiating from the impact point.
+  // Ring marks — the bell is being struck, sound coming off the dome.
   final mark = Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = 22 * s
     ..strokeCap = StrokeCap.round
     ..color = brass;
-  canvas.drawLine(Offset(560 * s, 208 * s), Offset(596 * s, 262 * s), mark);
-  canvas.drawLine(Offset(800 * s, 480 * s), Offset(742 * s, 452 * s), mark);
-  canvas.drawLine(Offset(690 * s, 180 * s), Offset(690 * s, 236 * s), mark);
+  canvas.drawLine(Offset(268 * s, 330 * s), Offset(316 * s, 378 * s), mark);
+  canvas.drawLine(Offset(430 * s, 250 * s), Offset(452 * s, 312 * s), mark);
+  canvas.drawLine(Offset(180 * s, 480 * s), Offset(246 * s, 502 * s), mark);
 }
 
 enum IconMark { fist, bell }
@@ -257,31 +286,25 @@ void main() {
       await _render(
         'assets/icon/app_icon.png',
         size: 1024,
-        neon: LedColors.red,
-        background: true,
-        contentScale: 1.0,
-      );
-      await _render(
-        'assets/icon/app_icon_green.png',
-        size: 1024,
-        neon: LedColors.green,
-        background: true,
-        contentScale: 1.0,
-      );
-      await _render(
-        'assets/icon/app_icon_bell.png',
-        size: 1024,
         neon: LedColors.amber,
         background: true,
         contentScale: 1.0,
         mark: IconMark.bell,
       );
       await _render(
+        'assets/icon/app_icon_fist.png',
+        size: 1024,
+        neon: LedColors.red,
+        background: true,
+        contentScale: 1.0,
+      );
+      await _render(
         'assets/icon/app_icon_foreground.png',
         size: 1080,
-        neon: LedColors.red,
+        neon: LedColors.amber,
         background: false,
         contentScale: 0.62,
+        mark: IconMark.bell,
       );
     });
   });

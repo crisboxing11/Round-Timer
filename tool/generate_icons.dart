@@ -22,30 +22,30 @@ import 'package:round_timer/theme/led_theme.dart';
 /// Authored on a 1024 grid, scaled by [s].
 Path _glovePath(double s) {
   final p = Path()
-    // Bottom-left of the forearm, up the left side.
-    ..moveTo(395 * s, 880 * s)
-    ..lineTo(390 * s, 700 * s)
+    // Bottom-left of the forearm, up the left side. Thick wrist.
+    ..moveTo(385 * s, 890 * s)
+    ..lineTo(382 * s, 700 * s)
     // Palm-left bulge.
-    ..cubicTo(378 * s, 660 * s, 340 * s, 640 * s, 332 * s, 560 * s)
-    ..cubicTo(324 * s, 480 * s, 330 * s, 420 * s, 352 * s, 385 * s)
-    // Knuckles: index, middle, ring, pinky — bumps with valleys between.
-    ..cubicTo(360 * s, 330 * s, 400 * s, 305 * s, 438 * s, 330 * s)
-    ..quadraticBezierTo(458 * s, 344 * s, 466 * s, 352 * s)
-    ..cubicTo(478 * s, 300 * s, 520 * s, 295 * s, 548 * s, 330 * s)
-    ..quadraticBezierTo(562 * s, 346 * s, 572 * s, 352 * s)
-    ..cubicTo(582 * s, 302 * s, 622 * s, 300 * s, 648 * s, 335 * s)
-    ..quadraticBezierTo(660 * s, 350 * s, 668 * s, 356 * s)
-    ..cubicTo(678 * s, 318 * s, 706 * s, 320 * s, 722 * s, 355 * s)
+    ..cubicTo(368 * s, 660 * s, 322 * s, 645 * s, 314 * s, 555 * s)
+    ..cubicTo(306 * s, 470 * s, 315 * s, 415 * s, 338 * s, 382 * s)
+    // Knuckles: index, middle, ring, pinky — big squared-off bumps.
+    ..cubicTo(348 * s, 318 * s, 398 * s, 292 * s, 442 * s, 322 * s)
+    ..quadraticBezierTo(462 * s, 338 * s, 472 * s, 344 * s)
+    ..cubicTo(482 * s, 288 * s, 532 * s, 282 * s, 562 * s, 320 * s)
+    ..quadraticBezierTo(576 * s, 338 * s, 586 * s, 342 * s)
+    ..cubicTo(596 * s, 292 * s, 640 * s, 290 * s, 668 * s, 326 * s)
+    ..quadraticBezierTo(680 * s, 344 * s, 688 * s, 350 * s)
+    ..cubicTo(700 * s, 314 * s, 730 * s, 318 * s, 746 * s, 356 * s)
     // Right edge down to the thumb.
-    ..cubicTo(738 * s, 400 * s, 742 * s, 440 * s, 738 * s, 470 * s)
+    ..cubicTo(762 * s, 400 * s, 766 * s, 442 * s, 760 * s, 472 * s)
     // Thumb curled across the side.
-    ..cubicTo(782 * s, 505 * s, 790 * s, 585 * s, 752 * s, 648 * s)
-    ..cubicTo(726 * s, 690 * s, 680 * s, 700 * s, 648 * s, 692 * s)
+    ..cubicTo(806 * s, 508 * s, 814 * s, 590 * s, 774 * s, 652 * s)
+    ..cubicTo(746 * s, 694 * s, 698 * s, 704 * s, 664 * s, 696 * s)
     // Into the wrist and down the right side of the forearm.
-    ..cubicTo(636 * s, 700 * s, 634 * s, 720 * s, 634 * s, 760 * s)
-    ..lineTo(634 * s, 880 * s)
+    ..cubicTo(652 * s, 704 * s, 650 * s, 724 * s, 650 * s, 760 * s)
+    ..lineTo(650 * s, 890 * s)
     // Rounded cut at the bottom of the forearm.
-    ..cubicTo(620 * s, 906 * s, 410 * s, 906 * s, 395 * s, 880 * s)
+    ..cubicTo(634 * s, 916 * s, 400 * s, 916 * s, 385 * s, 890 * s)
     ..close();
   return p;
 }
@@ -53,39 +53,46 @@ Path _glovePath(double s) {
 /// Detail cuts in panel color: finger gaps under the knuckle valleys, the
 /// thumb crease, and the hand-wrap bands across wrist and palm.
 Path _seamPath(double s) => Path()
-  // Finger gaps.
-  ..moveTo(462 * s, 372 * s)
-  ..lineTo(456 * s, 470 * s)
-  ..moveTo(568 * s, 370 * s)
-  ..lineTo(562 * s, 470 * s)
-  ..moveTo(664 * s, 374 * s)
-  ..lineTo(660 * s, 465 * s)
+  // Finger gaps — down through the white knuckle wrap.
+  ..moveTo(470 * s, 360 * s)
+  ..lineTo(462 * s, 452 * s)
+  ..moveTo(584 * s, 356 * s)
+  ..lineTo(576 * s, 452 * s)
+  ..moveTo(686 * s, 362 * s)
+  ..lineTo(680 * s, 450 * s)
   // Thumb crease.
-  ..moveTo(734 * s, 490 * s)
-  ..quadraticBezierTo(692 * s, 552 * s, 672 * s, 655 * s)
+  ..moveTo(756 * s, 492 * s)
+  ..quadraticBezierTo(712 * s, 556 * s, 690 * s, 660 * s)
   // Separation lines across the white wrist wrap.
-  ..moveTo(398 * s, 762 * s)
-  ..lineTo(630 * s, 748 * s)
-  ..moveTo(400 * s, 822 * s)
-  ..lineTo(630 * s, 810 * s);
+  ..moveTo(392 * s, 768 * s)
+  ..lineTo(648 * s, 752 * s)
+  ..moveTo(394 * s, 830 * s)
+  ..lineTo(648 * s, 816 * s);
 
 /// Wrap bands as filled strips (intersected with the fist silhouette):
 /// the wrist fully wrapped plus one angled palm band.
 Path _wrapBandsPath(double s, Path glove) {
   final bands = Path()
-    // Palm band — angled strip.
+    // Knuckle wrap — covers the knuckle ridge like a real wrap job.
     ..addPolygon([
-      Offset(320 * s, 500 * s),
-      Offset(680 * s, 562 * s),
-      Offset(670 * s, 618 * s),
-      Offset(310 * s, 556 * s),
+      Offset(280 * s, 270 * s),
+      Offset(800 * s, 270 * s),
+      Offset(800 * s, 462 * s),
+      Offset(280 * s, 462 * s),
     ], true)
-    // Wrist — fully wrapped from above the wrist line down.
+    // Diagonal band across the back of the hand, up toward the thumb.
     ..addPolygon([
-      Offset(370 * s, 712 * s),
-      Offset(660 * s, 696 * s),
-      Offset(660 * s, 910 * s),
-      Offset(370 * s, 910 * s),
+      Offset(300 * s, 592 * s),
+      Offset(770 * s, 474 * s),
+      Offset(770 * s, 545 * s),
+      Offset(300 * s, 663 * s),
+    ], true)
+    // Wrist — fully wrapped.
+    ..addPolygon([
+      Offset(365 * s, 705 * s),
+      Offset(668 * s, 688 * s),
+      Offset(668 * s, 920 * s),
+      Offset(365 * s, 920 * s),
     ], true);
   return Path.combine(PathOperation.intersect, bands, glove);
 }

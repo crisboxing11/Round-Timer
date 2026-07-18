@@ -63,14 +63,81 @@ Path _seamPath(double s) => Path()
   // Thumb crease.
   ..moveTo(734 * s, 490 * s)
   ..quadraticBezierTo(692 * s, 552 * s, 672 * s, 655 * s)
-  // Palm wrap band — angled across the hand, stopping short of the thumb.
-  ..moveTo(338 * s, 528 * s)
-  ..lineTo(662 * s, 585 * s)
-  // Wrist wrap bands.
-  ..moveTo(398 * s, 742 * s)
-  ..lineTo(630 * s, 728 * s)
-  ..moveTo(400 * s, 802 * s)
-  ..lineTo(630 * s, 790 * s);
+  // Separation lines across the white wrist wrap.
+  ..moveTo(398 * s, 762 * s)
+  ..lineTo(630 * s, 748 * s)
+  ..moveTo(400 * s, 822 * s)
+  ..lineTo(630 * s, 810 * s);
+
+/// Wrap bands as filled strips (intersected with the fist silhouette):
+/// the wrist fully wrapped plus one angled palm band.
+Path _wrapBandsPath(double s, Path glove) {
+  final bands = Path()
+    // Palm band — angled strip.
+    ..addPolygon([
+      Offset(320 * s, 500 * s),
+      Offset(680 * s, 562 * s),
+      Offset(670 * s, 618 * s),
+      Offset(310 * s, 556 * s),
+    ], true)
+    // Wrist — fully wrapped from above the wrist line down.
+    ..addPolygon([
+      Offset(370 * s, 712 * s),
+      Offset(660 * s, 696 * s),
+      Offset(660 * s, 910 * s),
+      Offset(370 * s, 910 * s),
+    ], true);
+  return Path.combine(PathOperation.intersect, bands, glove);
+}
+
+/// Ring-side fight bell: round gong disc, center bolt, hammer at two
+/// o'clock, strike marks. 1024 grid, scaled by [s].
+void _drawBell(Canvas canvas, double s, Color brass, Color bg) {
+  final center = Offset(500 * s, 560 * s);
+  final r = 250 * s;
+
+  // Glow + disc.
+  canvas.drawCircle(
+    center,
+    r,
+    Paint()
+      ..color = brass.withValues(alpha: 0.45)
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 40 * s),
+  );
+  canvas.drawCircle(center, r, Paint()..color = brass);
+  // Inner rim + center bolt, cut in panel color.
+  canvas.drawCircle(
+    center,
+    r * 0.62,
+    Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 22 * s
+      ..color = bg,
+  );
+  canvas.drawCircle(center, 34 * s, Paint()..color = bg);
+
+  // Hammer: shaft from upper-right toward the rim, round head at the rim.
+  final shaft = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 46 * s
+    ..strokeCap = StrokeCap.round
+    ..color = brass;
+  canvas.drawLine(
+      Offset(858 * s, 176 * s), Offset(716 * s, 330 * s), shaft);
+  canvas.drawCircle(Offset(700 * s, 348 * s), 64 * s, Paint()..color = brass);
+
+  // Strike marks radiating from the impact point.
+  final mark = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 22 * s
+    ..strokeCap = StrokeCap.round
+    ..color = brass;
+  canvas.drawLine(Offset(560 * s, 208 * s), Offset(596 * s, 262 * s), mark);
+  canvas.drawLine(Offset(800 * s, 480 * s), Offset(742 * s, 452 * s), mark);
+  canvas.drawLine(Offset(690 * s, 180 * s), Offset(690 * s, 236 * s), mark);
+}
+
+enum IconMark { fist, bell }
 
 void _drawIcon(
   Canvas canvas, {
@@ -78,6 +145,7 @@ void _drawIcon(
   required Color neon,
   required bool background,
   required double contentScale,
+  IconMark mark = IconMark.fist,
 }) {
   if (background) {
     canvas.drawRect(
@@ -119,6 +187,12 @@ void _drawIcon(
     );
   }
 
+  if (mark == IconMark.bell) {
+    _drawBell(canvas, s, neon, LedColors.bg);
+    canvas.restore();
+    return;
+  }
+
   // Solid silhouette over a soft LED glow.
   canvas.drawPath(
     glove,
@@ -128,7 +202,11 @@ void _drawIcon(
   );
   canvas.drawPath(glove, Paint()..color = neon);
 
-  // Seams cut into the fill in panel color give it the glove anatomy.
+  // Hand wraps in off-white over the fist.
+  canvas.drawPath(
+      _wrapBandsPath(s, glove), Paint()..color = LedColors.text);
+
+  // Seams cut into the fill in panel color give it the anatomy.
   canvas.drawPath(
     seam,
     Paint()
@@ -147,6 +225,7 @@ Future<void> _render(
   required Color neon,
   required bool background,
   required double contentScale,
+  IconMark mark = IconMark.fist,
 }) async {
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(recorder);
@@ -156,6 +235,7 @@ Future<void> _render(
     neon: neon,
     background: background,
     contentScale: contentScale,
+    mark: mark,
   );
   final image = await recorder.endRecording().toImage(size, size);
   final bytes = await image.toByteData(format: ui.ImageByteFormat.png);
@@ -180,6 +260,14 @@ void main() {
         neon: LedColors.green,
         background: true,
         contentScale: 1.0,
+      );
+      await _render(
+        'assets/icon/app_icon_bell.png',
+        size: 1024,
+        neon: LedColors.amber,
+        background: true,
+        contentScale: 1.0,
+        mark: IconMark.bell,
       );
       await _render(
         'assets/icon/app_icon_foreground.png',

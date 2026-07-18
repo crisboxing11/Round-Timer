@@ -22,11 +22,16 @@ class _CustomConfigScreenState extends State<CustomConfigScreen> {
   late Duration _work;
   late Duration _rest;
 
-  static const _workStep = Duration(seconds: 15);
-  static const _restStep = Duration(seconds: 15);
-  static const _minWork = Duration(seconds: 15);
+  static const _minWork = Duration(seconds: 10);
   static const _maxWork = Duration(minutes: 60);
   static const _maxRest = Duration(minutes: 15);
+
+  /// 5s steps under a minute (tabata territory), 15s above.
+  Duration _step(Duration d, {required bool up}) {
+    const threshold = Duration(minutes: 1);
+    final fine = up ? d < threshold : d <= threshold;
+    return fine ? const Duration(seconds: 5) : const Duration(seconds: 15);
+  }
 
   @override
   void initState() {
@@ -103,10 +108,12 @@ class _CustomConfigScreenState extends State<CustomConfigScreen> {
                     value: _fmt(_work),
                     color: LedColors.green,
                     onMinus: _work > _minWork
-                        ? () => setState(() => _work -= _workStep)
+                        ? () => setState(
+                            () => _work -= _step(_work, up: false))
                         : null,
                     onPlus: _work < _maxWork
-                        ? () => setState(() => _work += _workStep)
+                        ? () =>
+                            setState(() => _work += _step(_work, up: true))
                         : null,
                   ),
                   const SizedBox(height: 14),
@@ -115,10 +122,12 @@ class _CustomConfigScreenState extends State<CustomConfigScreen> {
                     value: _rest == Duration.zero ? 'OFF' : _fmt(_rest),
                     color: LedColors.red,
                     onMinus: _rest > Duration.zero
-                        ? () => setState(() => _rest -= _restStep)
+                        ? () => setState(
+                            () => _rest -= _step(_rest, up: false))
                         : null,
                     onPlus: _rest < _maxRest
-                        ? () => setState(() => _rest += _restStep)
+                        ? () =>
+                            setState(() => _rest += _step(_rest, up: true))
                         : null,
                   ),
                   const SizedBox(height: 22),

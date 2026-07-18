@@ -44,6 +44,23 @@ void main() {
             const Duration(minutes: 11), // 11 × 1:00
       );
     });
+
+    test('tabata preset: 8 × 20s work / 10s rest, classic 4:00 + prep', () {
+      final tabata = presets.firstWhere((p) => p.id == 'tabata');
+      final s = buildSchedule(tabata);
+      expect(s.where((p) => p.type == PhaseType.work).length, 8);
+      expect(s.where((p) => p.type == PhaseType.rest).length, 7);
+      final engine = TimerEngine(tabata);
+      // 8×20s + 7×10s = 3:50 (no rest after the final round) + 10s prep.
+      expect(engine.total, const Duration(minutes: 4));
+    });
+
+    test('emom preset: minute rounds, no rest phases', () {
+      final emom = presets.firstWhere((p) => p.id == 'emom');
+      final s = buildSchedule(emom);
+      expect(s.where((p) => p.type == PhaseType.rest), isEmpty);
+      expect(s.length, 11); // prep + 10 work
+    });
   });
 
   group('position', () {

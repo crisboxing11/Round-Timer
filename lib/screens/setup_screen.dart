@@ -69,17 +69,20 @@ class _SetupScreenState extends State<SetupScreen> {
                 child: _QuickStartTile(config: last, onTap: () => _start(last)),
               ),
             Expanded(
-              child: ListView.separated(
+              child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                itemCount: presets.length + 1,
-                separatorBuilder: (_, __) => const SizedBox(height: 12),
-                itemBuilder: (context, i) {
-                  if (i == presets.length) {
-                    return _CustomTile(onTap: _openCustom);
-                  }
-                  final p = presets[i];
-                  return _PresetTile(config: p, onTap: () => _start(p));
-                },
+                children: [
+                  for (final p in combatPresets) ...[
+                    _PresetTile(config: p, onTap: () => _start(p)),
+                    const SizedBox(height: 12),
+                  ],
+                  const _SectionLabel('CONDITIONING'),
+                  for (final p in conditioningPresets) ...[
+                    _PresetTile(config: p, onTap: () => _start(p)),
+                    const SizedBox(height: 12),
+                  ],
+                  _CustomTile(onTap: _openCustom),
+                ],
               ),
             ),
             const Padding(
@@ -148,6 +151,25 @@ class _QuickStartTile extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(2, 10, 2, 14),
+      child: Row(
+        children: [
+          Text(text, style: LedText.eyebrow),
+          const SizedBox(width: 12),
+          const Expanded(child: Divider(color: LedColors.border, height: 2)),
+        ],
       ),
     );
   }

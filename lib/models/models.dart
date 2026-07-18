@@ -56,7 +56,7 @@ class TimerConfig {
 }
 
 /// Exact rules per sport. Grappling done right is our wedge.
-const presets = <TimerConfig>[
+const combatPresets = <TimerConfig>[
   TimerConfig(id: 'boxing', name: 'Boxing', rounds: 12, work: Duration(minutes: 3), rest: Duration(minutes: 1)),
   TimerConfig(id: 'boxing_am', name: 'Boxing (Amateur)', rounds: 3, work: Duration(minutes: 3), rest: Duration(minutes: 1)),
   TimerConfig(id: 'mma', name: 'MMA', rounds: 5, work: Duration(minutes: 5), rest: Duration(minutes: 1)),
@@ -65,6 +65,17 @@ const presets = <TimerConfig>[
   TimerConfig(id: 'bjj', name: 'BJJ', rounds: 6, work: Duration(minutes: 5), rest: Duration(minutes: 1)),
   TimerConfig(id: 'wrestling', name: 'Wrestling', rounds: 2, work: Duration(minutes: 3), rest: Duration(seconds: 30)),
 ];
+
+/// Fight conditioning — the intervals fighters actually run between
+/// sparring days. Same engine, wider search reach (tabata/hiit).
+const conditioningPresets = <TimerConfig>[
+  TimerConfig(id: 'tabata', name: 'Tabata', rounds: 8, work: Duration(seconds: 20), rest: Duration(seconds: 10)),
+  TimerConfig(id: 'hiit', name: 'HIIT 30/30', rounds: 10, work: Duration(seconds: 30), rest: Duration(seconds: 30)),
+  TimerConfig(id: 'emom', name: 'EMOM', rounds: 10, work: Duration(minutes: 1), rest: Duration.zero),
+];
+
+/// All built-in presets, for storage lookups.
+const presets = <TimerConfig>[...combatPresets, ...conditioningPresets];
 
 /// Persist/restore the last used config so the app opens ready to go.
 /// Stores the full config as JSON so custom setups survive restarts too.

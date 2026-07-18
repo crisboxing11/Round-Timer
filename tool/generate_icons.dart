@@ -101,24 +101,56 @@ Path _wrapBandsPath(double s, Path glove) {
 /// brass bell disc with a center bolt on a square wooden backboard, with
 /// the L-shaped hammer arm anchored at the top edge, hanging down beside
 /// the bell with its striker bent into the rim. 1024 grid, scaled by [s].
-void _drawBell(Canvas canvas, double s, Color brass, Color bg) {
+void _drawBell(Canvas canvas, double s, Color accent, Color bg) {
   final bellCenter = Offset(490 * s, 570 * s);
   final r = 252 * s;
 
-  // Bell disc — solid brass over a soft glow, center bolt cut out.
-  // No grooves, no board: bare disc + mallet + vibration arcs is the
-  // universal "bell being struck" glyph.
+  // Combat palette: hot red bell, gold mallet and sound.
+  const bellCore = Color(0xFFFF5A3C);
+  const bellEdge = Color(0xFFD81E12);
+  const rimLight = Color(0xFFFF8A66);
+  const glowRed = Color(0xFFFF3B2A);
+
+  // Two-layer bloom: wide soft wash + tight hot halo.
+  canvas.drawCircle(
+    bellCenter,
+    r * 1.06,
+    Paint()
+      ..color = glowRed.withValues(alpha: 0.30)
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 80 * s),
+  );
   canvas.drawCircle(
     bellCenter,
     r,
     Paint()
-      ..color = brass.withValues(alpha: 0.45)
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 40 * s),
+      ..color = glowRed.withValues(alpha: 0.55)
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 26 * s),
   );
-  canvas.drawCircle(bellCenter, r, Paint()..color = brass);
+
+  // Bell disc — radial gradient, hot at the strike, deep at the rim.
+  canvas.drawCircle(
+    bellCenter,
+    r,
+    Paint()
+      ..shader = ui.Gradient.radial(
+        Offset(bellCenter.dx + r * 0.18, bellCenter.dy - r * 0.22),
+        r * 1.35,
+        [bellCore, bellEdge],
+        [0.15, 1.0],
+      ),
+  );
+  // Bright rim catch-light for pop, strongest toward the impact side.
+  canvas.drawCircle(
+    bellCenter,
+    r - 5 * s,
+    Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 10 * s
+      ..color = rimLight.withValues(alpha: 0.85),
+  );
   canvas.drawCircle(bellCenter, 36 * s, Paint()..color = bg);
 
-  // Mallet mid-swing at the upper right, head just off the rim.
+  // Gold mallet mid-swing at the upper right, head just off the rim.
   canvas.drawLine(
     Offset(892 * s, 196 * s),
     Offset(756 * s, 334 * s),
@@ -126,16 +158,23 @@ void _drawBell(Canvas canvas, double s, Color brass, Color bg) {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 44 * s
       ..strokeCap = StrokeCap.round
-      ..color = brass,
+      ..color = accent,
   );
-  canvas.drawCircle(Offset(738 * s, 352 * s), 62 * s, Paint()..color = brass);
+  canvas.drawCircle(
+    Offset(738 * s, 352 * s),
+    62 * s,
+    Paint()
+      ..color = accent.withValues(alpha: 0.45)
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 22 * s),
+  );
+  canvas.drawCircle(Offset(738 * s, 352 * s), 62 * s, Paint()..color = accent);
 
-  // Vibration arcs hugging the rim — the bell is ringing.
+  // Gold vibration arcs hugging the rim — the bell is ringing.
   final arcPaint = Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = 24 * s
     ..strokeCap = StrokeCap.round
-    ..color = brass;
+    ..color = accent;
   canvas.drawArc(
     Rect.fromCircle(center: bellCenter, radius: r + 62 * s),
     2.55, // left side, upper
@@ -148,14 +187,14 @@ void _drawBell(Canvas canvas, double s, Color brass, Color bg) {
     2.70,
     0.55,
     false,
-    arcPaint..color = brass.withValues(alpha: 0.55),
+    arcPaint..color = accent.withValues(alpha: 0.55),
   );
   // Strike ticks at the impact point.
   final mark = Paint()
     ..style = PaintingStyle.stroke
     ..strokeWidth = 20 * s
     ..strokeCap = StrokeCap.round
-    ..color = brass;
+    ..color = accent;
   canvas.drawLine(Offset(826 * s, 430 * s), Offset(778 * s, 452 * s), mark);
   canvas.drawLine(Offset(852 * s, 530 * s), Offset(800 * s, 536 * s), mark);
 }

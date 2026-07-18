@@ -19,6 +19,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
@@ -33,3 +34,11 @@ flutter:
           weight: 600
         - asset: assets/fonts/BarlowCondensed-ExtraBold.ttf
           weight: 800
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/app_icon.png"
+  remove_alpha_ios: true
+  adaptive_icon_background: "#0A0B0A"
+  adaptive_icon_foreground: "assets/icon/app_icon_foreground.png"

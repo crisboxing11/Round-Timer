@@ -16,47 +16,61 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:round_timer/theme/led_theme.dart';
 
-/// Upright boxing glove silhouette (like the glove emoji): big fist mass,
-/// thumb lobe on the left, cuff band below. Filled union of three shapes;
-/// seam lines are cut in background color on top. 1024 grid, scaled by [s].
+/// Raised fist with hand wraps, viewed from the back of the hand — the
+/// sport-agnostic combat mark (boxing, MMA, Muay Thai, grappling). Four
+/// knuckle bumps on top are what make the silhouette unmistakably a fist.
+/// Authored on a 1024 grid, scaled by [s].
 Path _glovePath(double s) {
-  Path oval(double cx, double cy, double rx, double ry, [double rot = 0]) {
-    final p = Path()
-      ..addOval(Rect.fromCenter(
-          center: Offset.zero, width: rx * 2, height: ry * 2));
-    final m = Matrix4.identity()
-      ..translateByDouble(cx * s, cy * s, 0, 1)
-      ..rotateZ(rot);
-    return p.transform(m.storage);
-  }
-
-  // Fist — big mass, biased right so the glove is asymmetric.
-  final fist = oval(572, 420, 265, 260);
-  // Thumb — clear lobe on the lower left.
-  final thumb = oval(330, 545, 115, 150, -0.20);
-  // Cuff — band below, tucked inside the fist's width so the union stays
-  // smooth (no stepped shoulders).
-  final cuff = Path()
-    ..addRRect(RRect.fromRectAndRadius(
-      Rect.fromCenter(
-          center: Offset(572 * s, 730 * s), width: 300 * s, height: 240 * s),
-      Radius.circular(58 * s),
-    ));
-
-  var glove = Path.combine(PathOperation.union, fist, thumb);
-  glove = Path.combine(PathOperation.union, glove, cuff);
-  return glove;
+  final p = Path()
+    // Bottom-left of the forearm, up the left side.
+    ..moveTo(395 * s, 880 * s)
+    ..lineTo(390 * s, 700 * s)
+    // Palm-left bulge.
+    ..cubicTo(378 * s, 660 * s, 340 * s, 640 * s, 332 * s, 560 * s)
+    ..cubicTo(324 * s, 480 * s, 330 * s, 420 * s, 352 * s, 385 * s)
+    // Knuckles: index, middle, ring, pinky — bumps with valleys between.
+    ..cubicTo(360 * s, 330 * s, 400 * s, 305 * s, 438 * s, 330 * s)
+    ..quadraticBezierTo(458 * s, 344 * s, 466 * s, 352 * s)
+    ..cubicTo(478 * s, 300 * s, 520 * s, 295 * s, 548 * s, 330 * s)
+    ..quadraticBezierTo(562 * s, 346 * s, 572 * s, 352 * s)
+    ..cubicTo(582 * s, 302 * s, 622 * s, 300 * s, 648 * s, 335 * s)
+    ..quadraticBezierTo(660 * s, 350 * s, 668 * s, 356 * s)
+    ..cubicTo(678 * s, 318 * s, 706 * s, 320 * s, 722 * s, 355 * s)
+    // Right edge down to the thumb.
+    ..cubicTo(738 * s, 400 * s, 742 * s, 440 * s, 738 * s, 470 * s)
+    // Thumb curled across the side.
+    ..cubicTo(782 * s, 505 * s, 790 * s, 585 * s, 752 * s, 648 * s)
+    ..cubicTo(726 * s, 690 * s, 680 * s, 700 * s, 648 * s, 692 * s)
+    // Into the wrist and down the right side of the forearm.
+    ..cubicTo(636 * s, 700 * s, 634 * s, 720 * s, 634 * s, 760 * s)
+    ..lineTo(634 * s, 880 * s)
+    // Rounded cut at the bottom of the forearm.
+    ..cubicTo(620 * s, 906 * s, 410 * s, 906 * s, 395 * s, 880 * s)
+    ..close();
+  return p;
 }
 
-/// Seams drawn in background color over the fill: the cuff line and the
-/// thumb crease — what makes the silhouette read "glove", not "blob".
+/// Detail cuts in panel color: finger gaps under the knuckle valleys, the
+/// thumb crease, and the hand-wrap bands across wrist and palm.
 Path _seamPath(double s) => Path()
-  // Cuff seam — slight downward arc across the wrist.
-  ..moveTo(440 * s, 640 * s)
-  ..quadraticBezierTo(572 * s, 692 * s, 704 * s, 640 * s)
-  // Thumb crease — along the inner edge of the thumb lobe.
-  ..moveTo(450 * s, 440 * s)
-  ..cubicTo(380 * s, 480 * s, 372 * s, 560 * s, 415 * s, 640 * s);
+  // Finger gaps.
+  ..moveTo(462 * s, 372 * s)
+  ..lineTo(456 * s, 470 * s)
+  ..moveTo(568 * s, 370 * s)
+  ..lineTo(562 * s, 470 * s)
+  ..moveTo(664 * s, 374 * s)
+  ..lineTo(660 * s, 465 * s)
+  // Thumb crease.
+  ..moveTo(734 * s, 490 * s)
+  ..quadraticBezierTo(692 * s, 552 * s, 672 * s, 655 * s)
+  // Palm wrap band — angled across the hand, stopping short of the thumb.
+  ..moveTo(338 * s, 528 * s)
+  ..lineTo(662 * s, 585 * s)
+  // Wrist wrap bands.
+  ..moveTo(398 * s, 742 * s)
+  ..lineTo(630 * s, 728 * s)
+  ..moveTo(400 * s, 802 * s)
+  ..lineTo(630 * s, 790 * s);
 
 void _drawIcon(
   Canvas canvas, {

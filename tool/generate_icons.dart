@@ -97,80 +97,67 @@ Path _wrapBandsPath(double s, Path glove) {
   return Path.combine(PathOperation.intersect, bands, glove);
 }
 
-/// Ringside fight bell: brass dome on a base plate, center bolt, hammer
-/// mid-strike, ring marks. Half-circle + plate + hammer — a silhouette
-/// nothing else on a home screen has. 1024 grid, scaled by [s].
+/// Ringside trip-gong fight bell, modeled on the real hardware: a round
+/// brass bell disc with a center bolt on a square wooden backboard, with
+/// the L-shaped hammer arm anchored at the top edge, hanging down beside
+/// the bell with its striker bent into the rim. 1024 grid, scaled by [s].
 void _drawBell(Canvas canvas, double s, Color brass, Color bg) {
-  final domeCenter = Offset(500 * s, 664 * s);
-  final r = 292 * s;
+  final bellCenter = Offset(490 * s, 570 * s);
+  final r = 252 * s;
 
-  // Glow behind the whole bell.
+  // Bell disc — solid brass over a soft glow, center bolt cut out.
+  // No grooves, no board: bare disc + mallet + vibration arcs is the
+  // universal "bell being struck" glyph.
   canvas.drawCircle(
-    Offset(500 * s, 560 * s),
+    bellCenter,
     r,
     Paint()
-      ..color = brass.withValues(alpha: 0.40)
-      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 44 * s),
+      ..color = brass.withValues(alpha: 0.45)
+      ..maskFilter = MaskFilter.blur(BlurStyle.normal, 40 * s),
   );
+  canvas.drawCircle(bellCenter, r, Paint()..color = brass);
+  canvas.drawCircle(bellCenter, 36 * s, Paint()..color = bg);
 
-  // Dome — half-circle sitting on the plate.
-  final dome = Path()
-    ..moveTo(domeCenter.dx - r, domeCenter.dy)
-    ..arcTo(Rect.fromCircle(center: domeCenter, radius: r), 3.14159, 3.14159,
-        false)
-    ..close();
-  canvas.drawPath(dome, Paint()..color = brass);
-
-  // Base plate — slightly wider than the dome.
-  canvas.drawRRect(
-    RRect.fromRectAndRadius(
-      Rect.fromLTRB(160 * s, 692 * s, 840 * s, 756 * s),
-      Radius.circular(20 * s),
-    ),
-    Paint()..color = brass,
-  );
-
-  // Center bolt + a rim line following the dome, cut in panel color.
-  canvas.drawCircle(
-      Offset(500 * s, 540 * s), 34 * s, Paint()..color = bg);
-  final rim = Path()
-    ..moveTo(domeCenter.dx - r * 0.72, domeCenter.dy - 26 * s)
-    ..arcTo(
-        Rect.fromCircle(
-            center: Offset(domeCenter.dx, domeCenter.dy - 26 * s),
-            radius: r * 0.72),
-        3.14159,
-        3.14159,
-        false);
-  canvas.drawPath(
-    rim,
-    Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 20 * s
-      ..color = bg,
-  );
-
-  // Hammer mid-strike at the upper right: shaft + round head.
+  // Mallet mid-swing at the upper right, head just off the rim.
   canvas.drawLine(
-    Offset(886 * s, 190 * s),
-    Offset(752 * s, 330 * s),
+    Offset(892 * s, 196 * s),
+    Offset(756 * s, 334 * s),
     Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 44 * s
       ..strokeCap = StrokeCap.round
       ..color = brass,
   );
-  canvas.drawCircle(Offset(736 * s, 348 * s), 60 * s, Paint()..color = brass);
+  canvas.drawCircle(Offset(738 * s, 352 * s), 62 * s, Paint()..color = brass);
 
-  // Ring marks — the bell is being struck, sound coming off the dome.
-  final mark = Paint()
+  // Vibration arcs hugging the rim — the bell is ringing.
+  final arcPaint = Paint()
     ..style = PaintingStyle.stroke
-    ..strokeWidth = 22 * s
+    ..strokeWidth = 24 * s
     ..strokeCap = StrokeCap.round
     ..color = brass;
-  canvas.drawLine(Offset(268 * s, 330 * s), Offset(316 * s, 378 * s), mark);
-  canvas.drawLine(Offset(430 * s, 250 * s), Offset(452 * s, 312 * s), mark);
-  canvas.drawLine(Offset(180 * s, 480 * s), Offset(246 * s, 502 * s), mark);
+  canvas.drawArc(
+    Rect.fromCircle(center: bellCenter, radius: r + 62 * s),
+    2.55, // left side, upper
+    0.85,
+    false,
+    arcPaint,
+  );
+  canvas.drawArc(
+    Rect.fromCircle(center: bellCenter, radius: r + 130 * s),
+    2.70,
+    0.55,
+    false,
+    arcPaint..color = brass.withValues(alpha: 0.55),
+  );
+  // Strike ticks at the impact point.
+  final mark = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = 20 * s
+    ..strokeCap = StrokeCap.round
+    ..color = brass;
+  canvas.drawLine(Offset(826 * s, 430 * s), Offset(778 * s, 452 * s), mark);
+  canvas.drawLine(Offset(852 * s, 530 * s), Offset(800 * s, 536 * s), mark);
 }
 
 enum IconMark { fist, bell }

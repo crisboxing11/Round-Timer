@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../audio/sound_service.dart';
 import '../engine/timer_engine.dart';
@@ -30,7 +32,7 @@ class _TimerScreenState extends State<TimerScreen> {
       ..onEvent = _handleEvent
       ..addListener(_onEngine);
     _sounds.init();
-    WakelockPlus.enable();
+    _tryWakelock(true);
     _engine.start();
     _ticker = Timer.periodic(const Duration(milliseconds: 100), (_) => _engine.tick());
     RoundService.start(
@@ -73,13 +75,19 @@ class _TimerScreenState extends State<TimerScreen> {
   }
 
   void _handleEvent(TimerEvent e, Phase? phase) {
+    // Bells for the ears, haptics for the wrists — wraps on, music loud.
     switch (e) {
       case TimerEvent.phaseStarted:
-        if (phase!.type != PhaseType.prep) _sounds.bell();
+        if (phase!.type != PhaseType.prep) {
+          _sounds.bell();
+          HapticFeedback.heavyImpact();
+        }
       case TimerEvent.tenSecondWarning:
         _sounds.clapper();
+        HapticFeedback.mediumImpact();
       case TimerEvent.finished:
         _sounds.bell();
+        HapticFeedback.heavyImpact();
     }
   }
 
@@ -89,9 +97,17 @@ class _TimerScreenState extends State<TimerScreen> {
     _engine.removeListener(_onEngine);
     RoundService.stop();
     _liveActivity.end();
-    WakelockPlus.disable();
+    _tryWakelock(false);
     _sounds.dispose();
     super.dispose();
+  }
+
+  Future<void> _tryWakelock(bool on) async {
+    try {
+      await (on ? WakelockPlus.enable() : WakelockPlus.disable());
+    } catch (e) {
+      debugPrint('Wakelock unavailable: $e');
+    }
   }
 
   @override
@@ -126,6 +142,114 @@ class _TimerScreenState extends State<TimerScreen> {
     final blink = !_engine.isRunning ||
         (_engine.elapsed.inMilliseconds ~/ 500).isEven;
 
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
+    final header = Column(
+      children: [
+        _StackLights(
+            active: finished
+                ? PhaseType.work
+                : (warning ? PhaseType.prep : pos.phase.type)),
+        SizedBox(height: isLandscape ? 8 : 14),
+        Text(roundLabel, style: LedText.roundLabel),
+      ],
+    );
+
+    final clock = SevenSegmentClock(
+      duration: finished ? Duration.zero : pos.remaining,
+      color: flashOff ? LedColors.ghost : color,
+      blinkColon: blink,
+    );
+
+    final controls = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _ControlButton(label: 'END', onTap: () => Navigator.of(context).pop()),
+        const SizedBox(width: 12),
+        if (!finished) ...[
+          _ControlButton(label: 'SKIP', onTap: _engine.skipPhase),
+          const SizedBox(width: 12),
+        ],
+        _ControlButton(
+          label: _sounds.muted ? 'UNMUTE' : 'MUTE',
+          onTap: () => setState(() => _sounds.muted = !_sounds.muted),
+        ),
+      ],
+    );
+
+    // Landscape is wall-timer mode: digits as big as the screen allows,
+    // controls tucked into one slim bottom row.
+    final body = isLandscape
+        ? Column(
+            children: [
+              Padding(padding: const EdgeInsets.only(top: 8), child: header),
+              Expanded(
+                child: Center(
+                  child: LayoutBuilder(
+                    builder: (context, c) {
+                      final w = math.min(
+                          c.maxWidth - 48, c.maxHeight * (13 / 4.6));
+                      return SizedBox(width: w, child: clock);
+                    },
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(stateLabel,
+                              style: LedText.stateLabel
+                                  .copyWith(color: color, fontSize: 28)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    controls,
+                  ],
+                ),
+              ),
+            ],
+          )
+        : Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Padding(padding: const EdgeInsets.only(top: 24), child: header),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: clock,
+              ),
+              Column(
+                children: [
+                  Text(stateLabel,
+                      style: LedText.stateLabel.copyWith(color: color)),
+                  const SizedBox(height: 6),
+                  Text(
+                    finished
+                        ? ''
+                        : 'TAP ANYWHERE TO ${_engine.isRunning ? 'PAUSE' : 'RESUME'}',
+                    style: const TextStyle(
+                      color: LedColors.textFaint,
+                      fontSize: 13,
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 20),
+                    child: controls,
+                  ),
+                ],
+              ),
+            ],
+          );
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: finished ? null : _engine.toggle,
@@ -141,65 +265,7 @@ class _TimerScreenState extends State<TimerScreen> {
               ),
             ],
           ),
-          child: SafeArea(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 24),
-                  child: Column(
-                    children: [
-                      _StackLights(active: finished ? PhaseType.work : (warning ? PhaseType.prep : pos.phase.type)),
-                      const SizedBox(height: 14),
-                      Text(roundLabel, style: LedText.roundLabel),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: SevenSegmentClock(
-                    duration: finished ? Duration.zero : pos.remaining,
-                    color: flashOff ? LedColors.ghost : color,
-                    blinkColon: blink,
-                  ),
-                ),
-                Column(
-                  children: [
-                    Text(stateLabel, style: LedText.stateLabel.copyWith(color: color)),
-                    const SizedBox(height: 6),
-                    Text(
-                      finished
-                          ? ''
-                          : 'TAP ANYWHERE TO ${_engine.isRunning ? 'PAUSE' : 'RESUME'}',
-                      style: const TextStyle(
-                        color: LedColors.textFaint,
-                        fontSize: 13,
-                        letterSpacing: 1.5,
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _ControlButton(label: 'END', onTap: () => Navigator.of(context).pop()),
-                          const SizedBox(width: 12),
-                          if (!finished)
-                            _ControlButton(label: 'SKIP', onTap: _engine.skipPhase),
-                          const SizedBox(width: 12),
-                          _ControlButton(
-                            label: _sounds.muted ? 'UNMUTE' : 'MUTE',
-                            onTap: () => setState(() => _sounds.muted = !_sounds.muted),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
+          child: SafeArea(child: body),
         ),
       ),
     );

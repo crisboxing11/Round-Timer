@@ -4,6 +4,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import '../audio/sound_service.dart';
 import '../engine/timer_engine.dart';
 import '../models/models.dart';
+import '../services/live_activity_service.dart';
 import '../services/round_service.dart';
 import '../theme/led_theme.dart';
 import 'seven_segment.dart';
@@ -19,6 +20,7 @@ class TimerScreen extends StatefulWidget {
 class _TimerScreenState extends State<TimerScreen> {
   late final TimerEngine _engine;
   final _sounds = SoundService();
+  final _liveActivity = LiveActivityService();
   Timer? _ticker;
 
   @override
@@ -35,6 +37,7 @@ class _TimerScreenState extends State<TimerScreen> {
       title: _notificationTitle(),
       text: _notificationText(),
     );
+    _liveActivity.sync(_engine, widget.config);
   }
 
   void _onEngine() {
@@ -43,6 +46,7 @@ class _TimerScreenState extends State<TimerScreen> {
       title: _notificationTitle(),
       text: _notificationText(),
     );
+    _liveActivity.sync(_engine, widget.config);
   }
 
   String _notificationTitle() {
@@ -84,6 +88,7 @@ class _TimerScreenState extends State<TimerScreen> {
     _ticker?.cancel();
     _engine.removeListener(_onEngine);
     RoundService.stop();
+    _liveActivity.end();
     WakelockPlus.disable();
     _sounds.dispose();
     super.dispose();

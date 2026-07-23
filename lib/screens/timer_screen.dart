@@ -44,6 +44,7 @@ class _TimerScreenState extends State<TimerScreen> {
 
   void _onEngine() {
     setState(() {});
+    _sounds.keepAlive(_engine.isRunning && !_engine.isFinished);
     RoundService.update(
       title: _notificationTitle(),
       text: _notificationText(),
@@ -189,14 +190,14 @@ class _TimerScreenState extends State<TimerScreen> {
                   child: LayoutBuilder(
                     builder: (context, c) {
                       final w = math.min(
-                          c.maxWidth - 48, c.maxHeight * (13 / 4.6));
+                          c.maxWidth - 48, (c.maxHeight - 28) * (13 / 4.6));
                       return SizedBox(width: w, child: clock);
                     },
                   ),
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 10),
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 18),
                 child: Row(
                   children: [
                     Expanded(

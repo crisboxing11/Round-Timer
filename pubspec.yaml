@@ -26,6 +26,7 @@ flutter:
   assets:
     - assets/audio/bell.m4a
     - assets/audio/clapper.m4a
+    - assets/audio/silence.m4a
   fonts:
     - family: BarlowCondensed
       fonts:

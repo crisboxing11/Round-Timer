@@ -10,6 +10,10 @@ import 'package:just_audio/just_audio.dart';
 class SoundService {
   final _bell = AudioPlayer();
   final _clapper = AudioPlayer();
+  // Looping silence at zero volume while the timer runs: an actively
+  // rendering audio session is what stops iOS from suspending the app when
+  // the screen locks — otherwise the engine freezes and bells never fire.
+  final _keepAlive = AudioPlayer();
   bool _ready = false;
   bool muted = false;
 
@@ -35,11 +39,29 @@ class SoundService {
     try {
       await _bell.setAsset('assets/audio/bell.m4a', preload: true);
       await _clapper.setAsset('assets/audio/clapper.m4a', preload: true);
+      await _keepAlive.setAsset('assets/audio/silence.m4a', preload: true);
+      await _keepAlive.setLoopMode(LoopMode.all);
+      await _keepAlive.setVolume(0);
       _ready = true;
     } catch (e) {
       // Assets not bundled yet — run silent rather than crash.
       debugPrint('SoundService: asset load failed, running silent: $e');
       _ready = false;
+    }
+  }
+
+  /// Keep the audio session rendering while [on]. Called every engine tick;
+  /// cheap when the state already matches.
+  Future<void> keepAlive(bool on) async {
+    if (!_ready || on == _keepAlive.playing) return;
+    try {
+      if (on) {
+        _keepAlive.play();
+      } else {
+        await _keepAlive.pause();
+      }
+    } catch (e) {
+      debugPrint('SoundService: keep-alive toggle failed: $e');
     }
   }
 
@@ -64,5 +86,6 @@ class SoundService {
   void dispose() {
     _bell.dispose();
     _clapper.dispose();
+    _keepAlive.dispose();
   }
 }

@@ -43,7 +43,8 @@ Ring the bell.
 ## Privacy labels
 Data collected: **none**. No tracking, no identifiers, no analytics.
 
-## Screenshots (`store/screenshots/`, captured iPhone 17 Pro Max, 1320×2868)
+## Screenshots
+Upload set: **`store/screenshots-6.5/`** (1284×2778 / landscape 2778×1284 — the sizes App Store Connect accepts). Originals in `store/screenshots/` (1320×2868 native).
 Suggested order in App Store Connect:
 1. `03_lock_live_activity.png` — hero: Live Activity ticking on the lock screen
 2. `02_fight_green.png` — FIGHT round, green LED

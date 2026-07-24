@@ -28,8 +28,10 @@ widget.build_configurations.each do |config|
   bs['TARGETED_DEVICE_FAMILY'] = '1,2'
   bs['CODE_SIGN_STYLE'] = 'Automatic'
   bs['DEVELOPMENT_TEAM'] = 'DW8WVJMN78'
-  bs['MARKETING_VERSION'] = '$(FLUTTER_BUILD_NAME)'
-  bs['CURRENT_PROJECT_VERSION'] = '$(FLUTTER_BUILD_NUMBER)'
+  # FLUTTER_BUILD_NAME is empty for extension targets and iOS rejects
+  # versionless appexes — pin literals, matching pubspec.yaml's version.
+  bs['MARKETING_VERSION'] = '1.0.0'
+  bs['CURRENT_PROJECT_VERSION'] = '1'
   bs['SKIP_INSTALL'] = 'YES'
   bs['ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS'] = 'NO'
 end

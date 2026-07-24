@@ -824,7 +824,7 @@
 				DEVELOPMENT_TEAM = DW8WVJMN78;
 				INFOPLIST_FILE = RoundTimerWidgets/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.crisboxing11.roundtimer.widgets;
 				PRODUCT_NAME = RoundTimerWidgets;
 				SDKROOT = iphoneos;
@@ -845,7 +845,7 @@
 				DEVELOPMENT_TEAM = DW8WVJMN78;
 				INFOPLIST_FILE = RoundTimerWidgets/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.crisboxing11.roundtimer.widgets;
 				PRODUCT_NAME = RoundTimerWidgets;
 				SDKROOT = iphoneos;
@@ -865,7 +865,7 @@
 				DEVELOPMENT_TEAM = DW8WVJMN78;
 				INFOPLIST_FILE = RoundTimerWidgets/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.crisboxing11.roundtimer.widgets;
 				PRODUCT_NAME = RoundTimerWidgets;
 				SDKROOT = iphoneos;

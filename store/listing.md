@@ -1,7 +1,7 @@
 # App Store listing — Round Timer
 
-## Name (29/30)
-Round Timer: Boxing, MMA, Judo
+## Name (28/30 — ASC rejects 30 exactly; commas dropped, search tokens identical)
+Round Timer: Boxing MMA Judo
 
 ## Subtitle (27/30)
 Muay Thai, BJJ & fight bell
